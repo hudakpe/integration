@@ -1,4 +1,4 @@
-package hu.hudakpe.flexion.network.model;
+package hu.hudakpe.flexion.network.wrapper;
 
 import com.flexionmobile.codingchallenge.integration.Purchase;
 
