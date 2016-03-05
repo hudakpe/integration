@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.flexionmobile.codingchallenge.integration.Integration;
 import com.flexionmobile.codingchallenge.integration.Purchase;
 import hu.hudakpe.flexion.network.IntegrationService;
-import hu.hudakpe.flexion.network.model.DefaultPurchase;
+import hu.hudakpe.flexion.network.wrapper.DefaultPurchase;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
@@ -14,22 +14,40 @@ import java.util.List;
 
 public class DefaultIntegration implements Integration {
 
-    private String BASE_URL = "http://dev2.flexionmobile.com/javachallenge/rest/developer/";
+    private static final String BASE_URL = "http://dev2.flexionmobile.com/javachallenge/rest/developer/";
 
     private Retrofit retrofit;
     private IntegrationService integrationService;
+    private String developerId;
+
+    public DefaultIntegration() {
+
+        this.developerId = "developer";
+        ObjectMapper mapper = configureJackson();
+        configureRetrofit(mapper);
+    }
 
     public DefaultIntegration(String developerId) {
+        this.developerId = developerId;
 
-        BASE_URL += developerId + "/";
+        ObjectMapper mapper = configureJackson();
+        configureRetrofit(mapper);
+    }
 
-        ObjectMapper mapper = new ObjectMapper();
+    public String getDeveloperId() {
+        return developerId;
+    }
 
+    private ObjectMapper configureJackson() {
+        ObjectMapper objectMapper = new ObjectMapper();
         SimpleModule simpleModule = new SimpleModule();
         simpleModule.addAbstractTypeMapping(Purchase.class, DefaultPurchase.class);
-        mapper.registerModule(simpleModule);
+        objectMapper.registerModule(simpleModule);
+        return objectMapper;
+    }
 
-        retrofit = new Retrofit.Builder().baseUrl(BASE_URL).addConverterFactory(JacksonConverterFactory.create(mapper)).build();
+    private void configureRetrofit(ObjectMapper objectMapper) {
+        retrofit = new Retrofit.Builder().baseUrl(BASE_URL + developerId + "/").addConverterFactory(JacksonConverterFactory.create(objectMapper)).build();
         integrationService = retrofit.create(IntegrationService.class);
     }
 
